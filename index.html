@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Flag Panel</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .flags-container {
+            position: fixed;
+            bottom: 0px;
+            right: 50px;
+            height: 250px;
+            background-color: rgb(237, 239, 244);
+            width: 350px;
+            border: 1px solid rgba(29, 49, 91, .3);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .flags-container .flags-container-head {
+            background-color: #6d84b4;
+            padding: 5px 8px;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        a.close-button {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .flags-container .flags-container-content {
+            height: 100%;
+            overflow-y: scroll;
+            padding: 8px 12px;
+        }
+
+        .flags-form {
+            margin-bottom: 4px;
+            display: flex;
+            direction: row;
+        }
+
+        .flags-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            border-radius: 5px 0 0 5px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        ul.feature-flags {
+            /* get rid of bullet points on side of list items */
+            list-style-type: none;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 5px 10px;
+        }
+
+        .feature:first-child {
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+        }
+
+        .feature:last-child {
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
+        }
+
+        .feature-name {
+            flex: 1;
+        }
+
+        .checkbox {
+            margin-right: 10px;
+        }
+
+        .toggle {
+            appearance: none;
+            width: 62px;
+            height: 32px;
+            display: inline-block;
+            position: relative;
+            border-radius: 50px;
+            overflow: hidden;
+            outline: none;
+            border: none;
+            cursor: pointer;
+            background-color: #707070;
+            transition: background-color ease 0.3s;
+        }
+
+        .toggle:before {
+            content: "on off";
+            display: block;
+            position: absolute;
+            z-index: 2;
+            width: 28px;
+            height: 28px;
+            background: #fff;
+            left: 2px;
+            top: 2px;
+            border-radius: 50%;
+            font: 10px/28px Helvetica;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-indent: -22px;
+            word-spacing: 37px;
+            color: #fff;
+            text-shadow: -1px -1px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
+        }
+
+        .toggle:checked {
+            background-color: #4CD964;
+        }
+
+        .toggle:checked:before {
+            left: 32px;
+        }
+
+        .button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            line-height: 0px;
+        }
+
+        .add-button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            background-color: lightgreen;
+            border-radius: 0 5px 5px 0;
+            padding: 7px;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .add-button:hover {
+            background-color: #4CD964;
+        }
+
+
+        .delete-button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            background-color: lightcoral;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 1.2rem;
+            line-height: 0;
+            color: #fff;
+        }
+
+        .delete-button:hover {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Hello world</h1>
+
+    <div class="flags-container">
+        <div class="flags-container-head">
+            <div>Feature Flag Panel</div>
+            <a class="close-button" href="javascript:closePanel();">&#10005;</a>
+        </div>
+        <div class="flags-container-content">
+            <form class="flags-form">
+                <input type="text" class="flags-input" placeholder="Add a feature flag...">
+                <button type="submit" class="add-button">Add</button>
+            </form>
+            <ul class="feature-flags">
+                <li class="feature" data-key="1594003133171">
+                    <span class="feature-name">Feature 1</span>
+                    <input class="checkbox toggle" type="checkbox">
+                    <button class="delete-button">&#10005;</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+
+    function getFeatureFlags() {
+        return { 'VENUE_LIST': 0, 'VENUE_SECTION': 1, 'EVENT_SECTION': 0 };
+    }
+    function closePanel() {
+        document.querySelector('.flags-container').remove();
+    }
+
+    const flagsForm = document.querySelector('.flags-form');
+    const flagsInput = document.querySelector('.flags-input');
+    const featureFlagItemList = document.querySelector('.feature-flags');
+    let flags = [];
+
+    flagsForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        addFeatureFlag(flagsInput.value);
+    });
+
+    function addFeatureFlag(feature = '') {
+        const name = feature.trim();
+        if (name !== '') {
+            const featureFlag = {
+                id: `${Date.now()}`,
+                name: name,
+                active: false
+            };
+            flags.push(featureFlag);
+            flags.sort(function (a, b) {
+                return a.name - b.name;
+            });
+            addToLocalStorage(flags);
+            flagsInput.value = '';
+        }
+    }
+
+    function renderFeatureFlags(flags) {
+        featureFlagItemList.innerHTML = '';
+        flags.forEach(function (feature) {
+            const li = document.createElement('li');
+            li.setAttribute('class', 'feature');
+            li.setAttribute('data-key', feature.id);
+            const checked = feature.active ? 'checked' : '';
+            li.innerHTML = `
+                <span class="feature-name">${feature.name}</span>
+                <input type="checkbox" class="checkbox toggle" ${checked}>
+                <button class="delete-button">&#10005;</button>
+            `;
+            featureFlagItemList.append(li);
+        });
+
+    }
+
+    function addToLocalStorage(flags) {
+        localStorage.setItem('flags', JSON.stringify(flags));
+        renderFeatureFlags(flags);
+    }
+
+    function getFromLocalStorage() {
+        const reference = localStorage.getItem('flags');
+        if (reference) {
+            flags = JSON.parse(reference);
+            renderFeatureFlags(flags);
+        }
+    }
+
+    function toggle(id) {
+        flags.forEach(function (feature) {
+            if (feature.id == id) {
+                feature.active = !feature.active;
+            }
+        });
+        addToLocalStorage(flags);
+    }
+
+    function deleteFeatureFlag(id) {
+        flags = flags.filter(function (feature) {
+            return feature.id != id;
+        });
+        addToLocalStorage(flags);
+    }
+
+    getFromLocalStorage();
+
+    featureFlagItemList.addEventListener('click', function (event) {
+        if (event.target.type === 'checkbox') {
+            toggle(event.target.parentElement.getAttribute('data-key'));
+        }
+        if (event.target.classList.contains('delete-button')) {
+            deleteFeatureFlag(event.target.parentElement.getAttribute('data-key'));
+        }
+    });
+</script>
+
+</html>

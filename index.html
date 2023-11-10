@@ -7,13 +7,7 @@
     <title>Feature Flag Panel</title>
 
     <style>
-        * {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
-
-        .flags-container {
+        .container {
             position: fixed;
             bottom: 0px;
             right: 50px;
@@ -24,7 +18,12 @@
             font-family: 'Open Sans', sans-serif;
         }
 
-        .flags-container .flags-container-head {
+        .container * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .container-header {
             background-color: #6d84b4;
             padding: 5px 8px;
             color: white;
@@ -38,7 +37,7 @@
             color: inherit;
         }
 
-        .flags-container .flags-container-content {
+        .container-content {
             height: 100%;
             overflow-y: scroll;
             padding: 8px 12px;
@@ -186,12 +185,12 @@
 
     <h1>Hello world</h1>
 
-    <div class="flags-container">
-        <div class="flags-container-head">
+    <div class="container">
+        <div class="container-header">
             <div>Feature Flag Panel</div>
             <a class="close-button" href="javascript:closePanel();">&#10005;</a>
         </div>
-        <div class="flags-container-content">
+        <div class="container-content">
             <form class="flags-form">
                 <input type="text" class="flags-input" placeholder="Add a feature flag...">
                 <button type="submit" class="add-button">Add</button>
@@ -213,7 +212,7 @@
         return { 'VENUE_LIST': 0, 'VENUE_SECTION': 1, 'EVENT_SECTION': 0 };
     }
     function closePanel() {
-        document.querySelector('.flags-container').remove();
+        document.querySelector('.container').remove();
     }
 
     const flagsForm = document.querySelector('.flags-form');
@@ -251,7 +250,7 @@
             li.setAttribute('data-key', feature.id);
             const checked = feature.active ? 'checked' : '';
             li.innerHTML = `
-                <span class="feature-name">${feature.name}</span>
+                <label class="feature-name">${feature.name}</label>
                 <input type="checkbox" class="checkbox toggle" ${checked}>
                 <button class="delete-button">&#10005;</button>
             `;
